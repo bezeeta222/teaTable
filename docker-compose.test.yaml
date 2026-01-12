@@ -1,0 +1,82 @@
+services:
+  teable:
+    image: bezeeta444/therawteatable:latest
+    restart: always
+    ports:
+      - '3000:3000'
+    volumes:
+      - teable-data:/app/.assets:rw
+    environment:
+      - TZ=UTC
+      - NEXT_ENV_IMAGES_ALL_REMOTE=true
+      # Postgres
+      - POSTGRES_HOST=teable-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=teable
+      - POSTGRES_USER=teable
+      - POSTGRES_PASSWORD=Teable2024
+      # Redis
+      - REDIS_HOST=teable-cache
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - REDIS_PASSWORD=Teable2024
+      # App
+      - PUBLIC_ORIGIN=http://127.0.0.1:3000
+      - PRISMA_DATABASE_URL=postgresql://teable:Teable2024@teable-db:5432/teable
+      - PUBLIC_DATABASE_PROXY=127.0.0.1:42345
+      # Redis Cache Provider
+      - BACKEND_CACHE_PROVIDER=redis
+      - BACKEND_CACHE_REDIS_URI=redis://default:Teable2024@teable-cache:6379/0
+    networks:
+      - teable-test
+    depends_on:
+      teable-db:
+        condition: service_healthy
+      teable-cache:
+        condition: service_healthy
+
+  teable-db:
+    image: postgres:15.4
+    restart: always
+    ports:
+      - '42345:5432'
+    volumes:
+      - teable-db:/var/lib/postgresql/data:rw
+    environment:
+      - TZ=UTC
+      - POSTGRES_DB=teable
+      - POSTGRES_USER=teable
+      - POSTGRES_PASSWORD=Teable2024
+    networks:
+      - teable-test
+    healthcheck:
+      test: ['CMD-SHELL', "sh -c 'pg_isready -U teable -d teable'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  teable-cache:
+    image: redis:7.2.4
+    restart: always
+    expose:
+      - '6379'
+    volumes:
+      - teable-cache:/data:rw
+    networks:
+      - teable-test
+    command: redis-server --appendonly yes --requirepass Teable2024
+    healthcheck:
+      test: ['CMD', 'redis-cli', '-a', 'Teable2024', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+networks:
+  teable-test:
+    name: teable-test-network
+    driver: bridge
+
+volumes:
+  teable-data: {}
+  teable-db: {}
+  teable-cache: {}

@@ -1250,38 +1250,10 @@ export class RecordService {
     await this.prismaService.txClient().$executeRawUnsafe(sql);
   }
 
-  async creditCheck(tableId: string) {
-    if (!this.thresholdConfig.maxFreeRowLimit) {
-      return;
-    }
-
-    const table = await this.prismaService.txClient().tableMeta.findFirstOrThrow({
-      where: { id: tableId, deletedTime: null },
-      select: { dbTableName: true, base: { select: { space: { select: { credit: true } } } } },
-    });
-
-    const rowCount = await this.getAllRecordCount(table.dbTableName);
-
-    const maxRowCount =
-      table.base.space.credit == null
-        ? this.thresholdConfig.maxFreeRowLimit
-        : table.base.space.credit;
-
-    if (rowCount >= maxRowCount) {
-      this.logger.log(`Exceed row count: ${maxRowCount}`, 'creditCheck');
-      throw new CustomHttpException(
-        `Exceed max row limit: ${maxRowCount}, please contact us to increase the limit`,
-        HttpErrorCode.VALIDATION_ERROR,
-        {
-          localization: {
-            i18nKey: 'httpErrors.billing.exceedMaxRowLimit',
-            context: {
-              maxRowCount,
-            },
-          },
-        }
-      );
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async creditCheck(_tableId: string) {
+    // Row limits disabled - unlimited rows allowed
+    return;
   }
 
   private async getAllViewIndexesField(dbTableName: string) {

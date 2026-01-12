@@ -1,7 +1,8 @@
-import { useEnv } from './useEnv';
-
+/**
+ * useIsEE - Always returns true (billing system removed)
+ * All EE features are unlocked for self-hosted instances.
+ */
 export const useIsEE = () => {
-  const { edition } = useEnv();
-
-  return edition?.toUpperCase() === 'EE';
+  // All EE features unlocked
+  return true;
 };

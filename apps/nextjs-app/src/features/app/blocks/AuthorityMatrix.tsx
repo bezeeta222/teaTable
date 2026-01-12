@@ -1,7 +1,5 @@
-import { Button } from '@teable/ui-lib/shadcn';
 import { Alert, AlertTitle, AlertDescription } from '@teable/ui-lib/shadcn/ui/alert';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useTranslation } from 'next-i18next';
 
 export function AuthorityMatrixPage() {
@@ -19,15 +17,13 @@ export function AuthorityMatrixPage() {
       <div className="flex h-full items-center justify-center p-4">
         <Alert className="w-[400px]">
           <AlertTitle>
-            <span className="text-lg">✨</span> {t('billing.enterpriseFeature')}
+            <span className="text-lg">🚧</span> Coming Soon
           </AlertTitle>
           <AlertDescription className="flex flex-col gap-3 text-xs">
-            <p>{t('billing.authorityMatrixRequiresUpgrade')}</p>
-            <Button className="w-fit" variant="default" asChild size="xs">
-              <Link href={`${t('help.appLink')}/setting/license-plan`} target="_blank">
-                {t('billing.viewPricing')}
-              </Link>
-            </Button>
+            <p>
+              Authority Matrix feature is currently under development and will be available in a
+              future release.
+            </p>
           </AlertDescription>
         </Alert>
       </div>

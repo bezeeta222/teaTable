@@ -1,7 +1,8 @@
-import { useEnv } from './useEnv';
-
+/**
+ * useIsCommunity - Always returns false (billing system removed)
+ * Running as EE mode with all features unlocked.
+ */
 export const useIsCommunity = () => {
-  const { edition } = useEnv();
-
-  return edition?.toUpperCase() != 'EE' && edition?.toUpperCase() != 'CLOUD';
+  // Running as EE mode with all features unlocked
+  return false;
 };

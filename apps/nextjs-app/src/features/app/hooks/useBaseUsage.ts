@@ -1,39 +1,49 @@
-import { useQuery } from '@tanstack/react-query';
-import { getBaseUsage } from '@teable/openapi';
-import { useBaseId } from '@teable/sdk/hooks';
-import { useIsTemplate } from '@teable/sdk/hooks/use-is-template';
-import { useIsCloud } from './useIsCloud';
-import { useIsEE } from './useIsEE';
+import { BillingProductLevel } from '@teable/openapi';
+import type { IUsageVo } from '@teable/openapi';
 
-export const useBaseUsage = (props?: { disabled?: boolean }) => {
-  const isEE = useIsEE();
-  const isCloud = useIsCloud();
-  const baseId = useBaseId() as string;
-  const isTemplate = useIsTemplate();
-
-  const { data: baseUsage } = useQuery({
-    queryKey: ['base-usage', baseId],
-    queryFn: ({ queryKey }) => getBaseUsage(queryKey[1]).then(({ data }) => data),
-    enabled: !props?.disabled && (isCloud || isEE) && !isTemplate,
-  });
-
-  return baseUsage;
+/**
+ * All features unlocked - billing system removed
+ * Returns full Enterprise-level access for all features
+ */
+const UNLIMITED_USAGE: IUsageVo = {
+  level: BillingProductLevel.Enterprise,
+  limit: {
+    maxRows: Number.MAX_SAFE_INTEGER,
+    maxSizeAttachments: Number.MAX_SAFE_INTEGER,
+    maxNumDatabaseConnections: Number.MAX_SAFE_INTEGER,
+    maxRevisionHistoryDays: 365,
+    maxAutomationHistoryDays: 365,
+    // Working features - enabled
+    rowColoringEnable: true,
+    buttonFieldEnable: true,
+    fieldAIEnable: true,
+    chatAIEnable: true,
+    adminPanelEnable: true,
+    userGroupEnable: true,
+    advancedExtensionsEnable: true,
+    passwordRestrictedSharesEnable: true,
+    authenticationEnable: true,
+    domainVerificationEnable: true,
+    organizationEnable: true,
+    appEnable: true,
+    customDomainEnable: true,
+    apiRateLimit: Number.MAX_SAFE_INTEGER,
+    maxNumAutomationSendEmail: Number.MAX_SAFE_INTEGER,
+    // Incomplete features - keep disabled until implemented
+    automationEnable: false,
+    auditLogEnable: false,
+    advancedPermissionsEnable: false,
+  },
 };
 
-export const useBaseUsageWithLoading = (props?: { disabled?: boolean }) => {
-  const isEE = useIsEE();
-  const isCloud = useIsCloud();
-  const baseId = useBaseId() as string;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const useBaseUsage = (_props?: { disabled?: boolean }) => {
+  // All features unlocked - return full access
+  return UNLIMITED_USAGE;
+};
 
-  const {
-    data: baseUsage,
-    isLoading,
-    isFetched,
-  } = useQuery({
-    queryKey: ['base-usage', baseId],
-    queryFn: ({ queryKey }) => getBaseUsage(queryKey[1]).then(({ data }) => data),
-    enabled: !props?.disabled && (isCloud || isEE),
-  });
-
-  return { baseUsage, loading: isLoading, isFetched };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const useBaseUsageWithLoading = (_props?: { disabled?: boolean }) => {
+  // All features unlocked - return full access immediately
+  return { baseUsage: UNLIMITED_USAGE, loading: false, isFetched: true };
 };

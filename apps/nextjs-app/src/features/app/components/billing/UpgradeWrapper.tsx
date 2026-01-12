@@ -1,18 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { Role } from '@teable/core';
-import { BillingProductLevel, getSpaceById } from '@teable/openapi';
-import { UsageLimitModalType, useUsageLimitModalStore } from '@teable/sdk/components/billing/store';
-import { ReactQueryKeys } from '@teable/sdk/config';
-import { useBase } from '@teable/sdk/hooks';
-import type { Base } from '@teable/sdk/model';
-import { toast } from '@teable/ui-lib/shadcn/ui/sonner';
-import { useTranslation } from 'next-i18next';
-import { useMemo, useCallback, type ReactElement, cloneElement } from 'react';
-import { useBillingLevel } from '../../hooks/useBillingLevel';
-import { useBillingLevelConfig } from '../../hooks/useBillingLevelConfig';
-import { useIsCloud } from '../../hooks/useIsCloud';
-import { useIsCommunity } from '../../hooks/useIsCommunity';
-import { useIsEE } from '../../hooks/useIsEE';
+import { BillingProductLevel } from '@teable/openapi';
+import type { ReactElement } from 'react';
 
 interface IUpgradeWrapperRenderProps {
   badge: ReactElement | null;
@@ -29,150 +16,22 @@ interface IUpgradeWrapperProps {
   onUpgradeClick?: () => void;
 }
 
-const getBillingLevelWeight = (level?: BillingProductLevel): number => {
-  const levelMap: Record<BillingProductLevel, number> = {
-    [BillingProductLevel.Free]: 1,
-    [BillingProductLevel.Pro]: 2,
-    [BillingProductLevel.Business]: 3,
-    [BillingProductLevel.Enterprise]: 4,
+/**
+ * UpgradeWrapper - All features unlocked (billing system removed)
+ * All features are available without upgrade prompts.
+ */
+export const UpgradeWrapper: React.FC<IUpgradeWrapperProps> = ({ children }) => {
+  // All features unlocked - no billing checks
+  const renderProps: IUpgradeWrapperRenderProps = {
+    badge: null,
+    needsUpgrade: false,
+    isCommunity: true,
+    currentLevel: BillingProductLevel.Enterprise,
   };
-  return level ? levelMap[level] : 0;
-};
-
-const isLevelSufficient = (
-  currentLevel?: BillingProductLevel,
-  targetLevel?: BillingProductLevel
-): boolean => {
-  if (!targetLevel) return true;
-  return getBillingLevelWeight(currentLevel) >= getBillingLevelWeight(targetLevel);
-};
-
-export const UpgradeWrapper: React.FC<IUpgradeWrapperProps> = ({
-  children,
-  spaceId,
-  targetBillingLevel,
-  onUpgradeClick,
-}) => {
-  const isCloud = useIsCloud();
-  const isCommunity = useIsCommunity();
-  const isEE = useIsEE();
-  const base = useBase() as Base | undefined;
-  const { t } = useTranslation('common');
-  const { openModal } = useUsageLimitModalStore();
-  spaceId = base?.spaceId ?? spaceId;
-  const baseId = base?.id;
-  // EE starts from business level
-  targetBillingLevel =
-    targetBillingLevel === BillingProductLevel.Pro && isEE
-      ? BillingProductLevel.Business
-      : targetBillingLevel;
-
-  const currentLevel = useBillingLevel(baseId ? { baseId } : { spaceId });
-
-  const { data: space } = useQuery({
-    queryKey: ReactQueryKeys.space(spaceId as string),
-    queryFn: ({ queryKey }) => getSpaceById(queryKey[1]).then((res) => res.data),
-    enabled: Boolean(!baseId) && Boolean(spaceId),
-  });
-
-  const isLevelSufficientMemo = useMemo(() => {
-    return isLevelSufficient(currentLevel, targetBillingLevel);
-  }, [currentLevel, targetBillingLevel]);
-
-  const isSpaceOwner = useMemo(() => {
-    if (baseId) {
-      return base?.role === Role.Owner;
-    }
-    return space?.role === Role.Owner;
-  }, [baseId, base?.role, space?.role]);
-
-  const needsUpgrade =
-    currentLevel && !isLevelSufficientMemo && !!targetBillingLevel && !isCommunity;
-
-  const handleUpgradeClick = useCallback(() => {
-    if (onUpgradeClick) {
-      onUpgradeClick();
-      return;
-    }
-
-    if (isCloud) {
-      if (!spaceId) {
-        toast.error('Base ID is required for billing upgrade');
-        return;
-      }
-
-      if (!isSpaceOwner) {
-        toast.warning(t('billing.spaceSubscriptionModal.description'));
-        return;
-      }
-
-      openModal(UsageLimitModalType.Upgrade);
-    } else {
-      window.open('https://app.teable.ai/public/pricing?host=self-hosted', '_blank');
-    }
-  }, [isCloud, spaceId, isSpaceOwner, t, openModal, onUpgradeClick]);
-
-  const billingConfig = useBillingLevelConfig(targetBillingLevel);
-
-  const badge = useMemo(() => {
-    if (!needsUpgrade) {
-      return null;
-    }
-
-    return (
-      <span
-        className={`cursor-pointer rounded px-1 text-[10px] leading-[16px] ${billingConfig.upgradeTagCls}`}
-        onClick={handleUpgradeClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleUpgradeClick();
-          }
-        }}
-        tabIndex={0}
-        role="button"
-        aria-label={`Upgrade to ${billingConfig.name}`}
-      >
-        {billingConfig.name}
-      </span>
-    );
-  }, [needsUpgrade, billingConfig, handleUpgradeClick]);
 
   if (typeof children === 'function') {
-    const element = children({
-      badge,
-      needsUpgrade: Boolean(needsUpgrade),
-      isCommunity,
-      currentLevel,
-    });
-    return cloneElement(element, {
-      onClickCapture: (e: Event) => {
-        if (!needsUpgrade) return;
-        e.preventDefault();
-        e.stopPropagation();
-        handleUpgradeClick();
-      },
-    });
+    return children(renderProps);
   }
 
-  if (!children) {
-    return badge;
-  }
-
-  if (isCommunity) {
-    return null;
-  }
-
-  if (isLevelSufficientMemo) {
-    return children;
-  }
-
-  return cloneElement(children, {
-    onClickCapture: (e: Event) => {
-      if (!needsUpgrade) return;
-      e.preventDefault();
-      e.stopPropagation();
-      handleUpgradeClick();
-    },
-  });
+  return children ?? null;
 };

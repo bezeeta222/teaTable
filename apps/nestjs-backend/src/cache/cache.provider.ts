@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import path from 'path';
 import KeyvRedis from '@keyv/redis';
-import KeyvSqlite from '@keyv/sqlite';
 import type { Provider } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import * as fse from 'fs-extra';
@@ -19,14 +18,16 @@ export const CacheProvider: Provider = {
 
     Logger.log(`[Cache Manager Adapter]: ${provider}`);
 
-    const store = match(provider)
+    const store = await match(provider)
       .with('memory', () => new Map())
-      .with('sqlite', () => {
+      .with('sqlite', async () => {
         const uri = sqlite.uri.replace(/^sqlite:\/\//, '');
         fse.ensureFileSync(uri);
 
         Logger.log(`[Cache Manager File Path]: ${path.resolve(uri)}`);
 
+        // Dynamic import to avoid loading sqlite3 when not using sqlite cache
+        const { default: KeyvSqlite } = await import('@keyv/sqlite');
         return new KeyvSqlite({
           ...sqlite,
           uri,
