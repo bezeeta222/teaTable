@@ -239,3 +239,66 @@ This project uses **pnpm** (not npm/yarn/bun). Bun was tested but causes NestJS 
 - `packages/sdk/src/hooks/` - React data fetching hooks
 - `packages/db-main-prisma/prisma/` - Database schema
 - `scripts/dev-start.sh` - Development startup script
+
+## Adding New Field Types
+
+When adding a new field type (e.g., Signature), update these locations:
+
+### Core Package (`packages/core/src/models/field/`)
+1. `constant.ts` - Add to `FieldType` enum
+2. `derivate/{field-name}.field.ts` - Field class extending `FieldCore`
+3. `derivate/{field-name}-option.schema.ts` - Zod schema for field options
+4. `derivate/index.ts` - Export new schemas
+5. `field.schema.ts` - Add to field union types
+6. `field-unions.schema.ts` - Add to union discriminator
+7. `options.schema.ts` - Add options to union
+8. `field-visitor.interface.ts` - Add visitor method
+9. `cell-value-validation.ts` - Add validation case
+
+### Backend (`apps/nestjs-backend/src/`)
+1. `features/field/model/factory.ts` - Add to field factory
+2. `features/field/model/field-dto/{field}.dto.ts` - DTO class
+3. `db-provider/create-database-column-query/` - Column creation visitors (postgres + sqlite)
+4. `db-provider/drop-database-column-query/` - Column drop visitors
+5. `features/record/query-builder/field-*.ts` - Query builder visitors
+6. `features/record/record.service.ts` - presignedUrl generation (if storing files)
+
+### Frontend SDK (`packages/sdk/src/`)
+1. `model/field/{field}.field.ts` - Frontend field class
+2. `model/field/factory.ts` - Add to factory
+3. `model/field/index.ts` - Export
+4. `components/editor/{field}/Editor.tsx` - Editor component
+5. `components/cell-value/cell-{field}/` - Cell display component
+6. `components/cell-value-editor/CellEditorMain.tsx` - Editor routing
+7. `components/cell-value/CellValue.tsx` - Cell display routing
+8. `components/grid-enhancements/hooks/use-grid-columns.tsx` - Grid cell mapping
+9. `hooks/use-field-static-getter.ts` - Static field info
+10. `utils/fieldType.ts` - Field type utilities
+
+### Frontend App (`apps/nextjs-app/src/features/app/components/field-setting/`)
+1. `SelectFieldType.tsx` - Add to field type selector
+2. `FieldOptions.tsx` - Add options component routing
+3. `options/{Field}Options.tsx` - Field-specific options UI
+4. `useFieldTypeSubtitle.ts` - Field type description
+
+### i18n (`packages/common-i18n/src/locales/`)
+1. `en/table.json` - Field type labels
+2. `en/sdk.json` - Editor/component labels
+
+## Technical Debt
+
+### Signature Field (Added Jan 2025)
+- **Missing Tests**: No unit or E2E tests for Signature field
+- **i18n Incomplete**: Only English translations added; needs zh-CN, ja, de, fr, etc.
+- **Form View**: Not tested in form views (may need additional integration)
+- **Share View**: Not verified in public share views
+- **Lookup/Rollup**: Signature fields cannot be used as lookup sources (by design, but not enforced in UI)
+
+### Grid Rendering
+The grid uses **canvas-based rendering** with `CellType` enum, not React components. New fields displaying images should map to `CellType.Image` in `use-grid-columns.tsx`. The grid does NOT render React components - it uses a custom canvas renderer.
+
+### presignedUrl Pattern
+Fields storing files (Attachment, Signature) require runtime URL generation:
+- URLs are NOT stored in database - only `path` and `token`
+- `presignedUrl` is generated in `record.service.ts` at read time
+- Must handle both single records and batch operations
