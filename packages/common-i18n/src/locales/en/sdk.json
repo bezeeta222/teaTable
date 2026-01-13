@@ -31,7 +31,9 @@
     },
     "resetSuccess": "Reset successfully",
     "click": "Click",
-    "clickedCount": "{{label}}: Clicked {{text}} times"
+    "clickedCount": "{{label}}: Clicked {{text}} times",
+    "clear": "Clear",
+    "save": "Save"
   },
   "notification": {
     "title": "Notification"
@@ -123,6 +125,9 @@
     },
     "conditionalLookup": {
       "filterRequired": "Conditional lookup requires at least one filter condition"
+    },
+    "signature": {
+      "placeholder": "Sign here"
     },
     "aiConfig": {
       "modelKeyRequired": "Model is required",
@@ -316,7 +321,8 @@
       "conditionalLookup": "Conditional lookup",
       "button": "Button",
       "createdBy": "Created by",
-      "lastModifiedBy": "Last modified by"
+      "lastModifiedBy": "Last modified by",
+      "signature": "Signature"
     },
     "description": {
       "singleLineText": "Store short text like names or titles.",
@@ -340,7 +346,8 @@
       "conditionalLookup": "Show linked values that match filters you define.",
       "button": "Run actions with a clickable button.",
       "createdBy": "Show who created the record.",
-      "lastModifiedBy": "Show who last modified the record."
+      "lastModifiedBy": "Show who last modified the record.",
+      "signature": "Capture handwritten signatures."
     },
     "link": {
       "oneWay": "One way",

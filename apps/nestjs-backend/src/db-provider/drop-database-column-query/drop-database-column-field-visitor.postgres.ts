@@ -17,6 +17,7 @@ import type {
   RatingFieldCore,
   RollupFieldCore,
   ConditionalRollupFieldCore,
+  SignatureFieldCore,
   SingleLineTextFieldCore,
   SingleSelectFieldCore,
   UserFieldCore,
@@ -212,6 +213,10 @@ export class DropPostgresDatabaseColumnFieldVisitor implements IFieldVisitor<str
   }
 
   visitButtonField(field: ButtonFieldCore): string[] {
+    return this.dropStandardColumn(field);
+  }
+
+  visitSignatureField(field: SignatureFieldCore): string[] {
     return this.dropStandardColumn(field);
   }
 

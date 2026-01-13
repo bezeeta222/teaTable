@@ -22,6 +22,7 @@ import type {
   UserFieldCore,
   IFieldVisitor,
   ButtonFieldCore,
+  SignatureFieldCore,
   TableDomain,
 } from '@teable/core';
 import { DbFieldType, FieldType, isLinkLookupOptions, DriverClient } from '@teable/core';
@@ -565,6 +566,10 @@ export class FieldSelectVisitor implements IFieldVisitor<IFieldSelectName> {
   }
 
   visitButtonField(field: ButtonFieldCore): IFieldSelectName {
+    return this.checkAndSelectLookupField(field);
+  }
+
+  visitSignatureField(field: SignatureFieldCore): IFieldSelectName {
     return this.checkAndSelectLookupField(field);
   }
 

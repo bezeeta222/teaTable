@@ -16,6 +16,7 @@ import type {
   RatingFieldCore,
   RollupFieldCore,
   ConditionalRollupFieldCore,
+  SignatureFieldCore,
   SingleLineTextFieldCore,
   SingleSelectFieldCore,
   UserFieldCore,
@@ -195,6 +196,10 @@ export class DropSqliteDatabaseColumnFieldVisitor implements IFieldVisitor<strin
   }
 
   visitButtonField(field: ButtonFieldCore): string[] {
+    return this.dropStandardColumn(field);
+  }
+
+  visitSignatureField(field: SignatureFieldCore): string[] {
     return this.dropStandardColumn(field);
   }
 

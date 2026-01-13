@@ -21,6 +21,7 @@ import {
   type CreatedByFieldCore,
   type LastModifiedByFieldCore,
   type ButtonFieldCore,
+  type SignatureFieldCore,
   type INumberFormatting,
   type IDatetimeFormatting,
 } from '@teable/core';
@@ -241,6 +242,11 @@ export class FieldFormattingVisitor implements IFieldVisitor<string> {
 
   visitButtonField(_field: ButtonFieldCore): string {
     // Button fields don't have values, return as-is
+    return this.fieldExpression;
+  }
+
+  visitSignatureField(_field: SignatureFieldCore): string {
+    // Signature fields store JSON, return as-is
     return this.fieldExpression;
   }
 }

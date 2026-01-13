@@ -180,6 +180,9 @@
         "confirmDescription": "Content",
         "confirmButtonText": "Confirm button text"
       },
+      "signature": {
+        "title": "Signature"
+      },
       "formula": {
         "title": "Calculation",
         "formula": "Formula"
@@ -280,6 +283,16 @@
       "linkTipMessage": "This configuration represents a<br></br> <b>{{relationship}}</b> relationship <span>{{linkType}}</span>",
       "style": "Style",
       "maximum": "Maximum",
+      "signature": {
+        "penColor": "Pen color",
+        "penWidth": "Pen width",
+        "background": "Background",
+        "showTimestamp": "Show signature timestamp",
+        "bgTransparent": "Transparent",
+        "bgWhite": "White",
+        "bgGray": "Light gray",
+        "bgCream": "Cream"
+      },
       "addOption": "Add option",
       "allowMultiUsers": "Allow adding multiple users",
       "notifyUsers": "Notify users once they're selected",
@@ -353,7 +366,8 @@
       "lastModifiedBy": "See which user made the most recent edit to some or all fields in a record.",
       "autoNumber": "Automatically generate unique incremental numbers for each record.",
       "button": "Trigger a customized action.",
-      "lookup": "See values from a field in a linked record."
+      "lookup": "See values from a field in a linked record.",
+      "signature": "Capture handwritten signatures digitally."
     },
     "fieldName": "Field name",
     "fieldNameOptional": "Field name (Optional)",

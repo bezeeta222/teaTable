@@ -19,6 +19,7 @@ import { MultipleSelectField } from './multiple-select.field';
 import { NumberField } from './number.field';
 import { RatingField } from './rating.field';
 import { RollupField } from './rollup.field';
+import { SignatureField } from './signature.field';
 import { SingleLineTextField } from './single-line-text.field';
 import { SingleSelectField } from './single-select.field';
 import { UserField } from './user.field';
@@ -66,6 +67,8 @@ export function createFieldInstance(field: IFieldVo, doc?: Doc<IFieldVo>) {
         return plainToInstance(LastModifiedByField, field);
       case FieldType.Button:
         return plainToInstance(ButtonField, field);
+      case FieldType.Signature:
+        return plainToInstance(SignatureField, field);
       default:
         assertNever(field.type);
     }

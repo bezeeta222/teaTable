@@ -44,6 +44,7 @@ export const FIELD_TYPE_ORDER1 = [
   FieldType.Rating,
   FieldType.Checkbox,
   FieldType.Attachment,
+  FieldType.Signature,
   FieldType.Formula,
   FieldType.Link,
   FieldType.Rollup,
@@ -67,6 +68,7 @@ const BASE_FIELD_TYPE = [
   FieldType.Rating,
   FieldType.Checkbox,
   FieldType.Attachment,
+  FieldType.Signature,
 ];
 
 const ADVANCED_FIELD_TYPE_ORDER = [

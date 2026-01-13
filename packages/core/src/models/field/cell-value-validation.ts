@@ -11,6 +11,7 @@ import {
   numberCellValueSchema,
   singleLineTextCelValueSchema,
   userCellValueSchema,
+  signatureCellValueSchema,
 } from './derivate';
 import type { IFieldVo } from './field.schema';
 
@@ -57,6 +58,8 @@ export const validateCellValue = (field: IFieldVo, cellValue: unknown) => {
     }
     case FieldType.Button:
       return validateWithSchema(buttonFieldCelValueSchema, cellValue);
+    case FieldType.Signature:
+      return signatureCellValueSchema.nullable().safeParse(cellValue);
     default:
       assertNever(type);
   }

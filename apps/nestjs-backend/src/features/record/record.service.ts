@@ -7,6 +7,7 @@ import type {
   CreatedByFieldCore,
   FieldCore,
   IAttachmentCellValue,
+  ISignatureCellValue,
   IColumnMeta,
   IExtraResult,
   IFilter,
@@ -1555,7 +1556,10 @@ export class RecordService {
     fields: IFieldInstance[],
     fieldKeyType: FieldKeyType
   ) {
-    if (records.length === 0 || fields.findIndex((f) => f.type === FieldType.Attachment) === -1) {
+    const hasAttachmentOrSignature = fields.some(
+      (f) => f.type === FieldType.Attachment || f.type === FieldType.Signature
+    );
+    if (records.length === 0 || !hasAttachmentOrSignature) {
       return records;
     }
     const cacheTokenUrlMap = await this.getCachePreviewUrlTokenMap(records, fields, fieldKeyType);
@@ -1574,6 +1578,15 @@ export class RecordService {
             cacheTokenUrlMap,
             thumbnailPathTokenMap
           );
+          if (presignedCellValue == null) continue;
+
+          record.data.fields[fieldKey] = presignedCellValue;
+        }
+      } else if (field.type === FieldType.Signature) {
+        const fieldKey = field[fieldKeyType];
+        for (const record of records) {
+          const cellValue = record.data.fields[fieldKey] as ISignatureCellValue | null;
+          const presignedCellValue = await this.getSignaturePresignedCellValue(cellValue);
           if (presignedCellValue == null) continue;
 
           record.data.fields[fieldKey] = presignedCellValue;
@@ -1631,6 +1644,31 @@ export class RecordService {
         };
       })
     );
+  }
+
+  async getSignaturePresignedCellValue(
+    cellValue: ISignatureCellValue | null
+  ): Promise<ISignatureCellValue | null> {
+    if (cellValue == null) {
+      return null;
+    }
+
+    const { path, mimetype, token, name } = cellValue;
+    const presignedUrl = await this.attachmentStorageService.getPreviewUrlByPath(
+      StorageAdapter.getBucket(UploadType.Table),
+      path,
+      token,
+      undefined,
+      {
+        'Content-Type': mimetype,
+        'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(name)}`,
+      }
+    );
+
+    return {
+      ...cellValue,
+      presignedUrl,
+    };
   }
 
   private async getSnapshotBulkInner(
@@ -2281,6 +2319,8 @@ export class RecordService {
 
         if (field.type === FieldType.Attachment) {
           value = await this.getAttachmentPresignedCellValue(value as IAttachmentCellValue);
+        } else if (field.type === FieldType.Signature) {
+          value = await this.getSignaturePresignedCellValue(value as ISignatureCellValue);
         }
 
         groupPoints.push({

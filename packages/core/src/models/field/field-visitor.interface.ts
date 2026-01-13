@@ -15,6 +15,7 @@ import type { MultipleSelectFieldCore } from './derivate/multiple-select.field';
 import type { NumberFieldCore } from './derivate/number.field';
 import type { RatingFieldCore } from './derivate/rating.field';
 import type { RollupFieldCore } from './derivate/rollup.field';
+import type { SignatureFieldCore } from './derivate/signature.field';
 import type { SingleLineTextFieldCore } from './derivate/single-line-text.field';
 import type { SingleSelectFieldCore } from './derivate/single-select.field';
 import type { UserFieldCore } from './derivate/user.field';
@@ -53,4 +54,7 @@ export interface IFieldVisitor<T = unknown> {
   visitLastModifiedByField(field: LastModifiedByFieldCore): T;
 
   visitButtonField(field: ButtonFieldCore): T;
+
+  // Signature field
+  visitSignatureField(field: SignatureFieldCore): T;
 }

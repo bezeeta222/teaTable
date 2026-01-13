@@ -39,3 +39,5 @@ export * from './last-modified-by.field';
 export * from './last-modified-by-option.schema';
 export * from './button.field';
 export * from './button-option.schema';
+export * from './signature.field';
+export * from './signature-option.schema';

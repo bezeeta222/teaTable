@@ -25,6 +25,7 @@ import { MultipleSelectFieldDto } from './field-dto/multiple-select-field.dto';
 import { NumberFieldDto } from './field-dto/number-field.dto';
 import { RatingFieldDto } from './field-dto/rating-field.dto';
 import { RollupFieldDto } from './field-dto/rollup-field.dto';
+import { SignatureFieldDto } from './field-dto/signature-field.dto';
 import { SingleLineTextFieldDto } from './field-dto/single-line-text-field.dto';
 import { SingleSelectFieldDto } from './field-dto/single-select-field.dto';
 import { UserFieldDto } from './field-dto/user-field.dto';
@@ -131,6 +132,8 @@ export function createFieldInstanceByVo(field: IFieldVo) {
       return plainToInstance(LastModifiedByFieldDto, field);
     case FieldType.Button:
       return plainToInstance(ButtonFieldDto, field);
+    case FieldType.Signature:
+      return plainToInstance(SignatureFieldDto, field);
     default:
       assertNever(field.type);
   }

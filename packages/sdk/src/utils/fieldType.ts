@@ -11,6 +11,7 @@ export const FIELD_TYPE_ORDER = [
   FieldType.Rating,
   FieldType.Checkbox,
   FieldType.Attachment,
+  FieldType.Signature,
   FieldType.Formula,
   FieldType.Link,
   FieldType.Rollup,

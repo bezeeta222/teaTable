@@ -17,6 +17,7 @@ import type {
   ILongTextFieldOptions,
   IButtonFieldOptions,
   IConditionalRollupFieldOptions,
+  ISignatureFieldOptions,
 } from '@teable/core';
 import {
   CellValueType,
@@ -41,6 +42,7 @@ import { NumberOptions } from './options/NumberOptions';
 import { RatingOptions } from './options/RatingOptions';
 import { RollupOptions } from './options/RollupOptions';
 import { SelectOptions } from './options/SelectOptions/SelectOptions';
+import { SignatureOptions } from './options/SignatureOptions';
 import { SingleLineTextOptions } from './options/SingleLineTextOptions';
 import { UserOptions } from './options/UserOptions';
 import type { IFieldEditorRo } from './type';
@@ -200,6 +202,14 @@ export const FieldOptions: React.FC<IFieldOptionsProps> = ({ field, onChange, on
           isLookup={isLookup}
           onChange={onChange}
           onSave={onSave}
+        />
+      );
+    case FieldType.Signature:
+      return (
+        <SignatureOptions
+          options={options as ISignatureFieldOptions}
+          isLookup={isLookup}
+          onChange={onChange}
         />
       );
     default:

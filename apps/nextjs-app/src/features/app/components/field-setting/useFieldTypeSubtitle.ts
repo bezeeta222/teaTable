@@ -49,6 +49,8 @@ export const useFieldTypeSubtitle = () => {
           return t('table:field.subTitle.autoNumber');
         case FieldType.Button:
           return t('table:field.subTitle.button');
+        case FieldType.Signature:
+          return t('table:field.subTitle.signature');
         default: {
           assertNever(fieldType);
         }

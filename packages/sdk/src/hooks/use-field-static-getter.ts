@@ -27,6 +27,7 @@ import {
   EyeOff,
   MagicAi,
   MousePointerClick as MousePointerClickIcon,
+  Pencil as SignatureIcon,
 } from '@teable/icons';
 
 import { useCallback } from 'react';
@@ -43,6 +44,7 @@ import {
   MultipleSelectField,
   NumberField,
   RatingField,
+  SignatureField,
   SingleLineTextField,
   SingleSelectField,
   UserField,
@@ -226,6 +228,13 @@ export const useFieldStaticGetter = () => {
               color: Colors.Teal,
             },
             Icon: getIcon(MousePointerClickIcon),
+          };
+        case FieldType.Signature:
+          return {
+            title: t('field.title.signature'),
+            description: t('field.description.signature'),
+            defaultOptions: SignatureField.defaultOptions(),
+            Icon: getIcon(SignatureIcon),
           };
         default:
           throw new Error(`field type: ${type} has not define statics`);

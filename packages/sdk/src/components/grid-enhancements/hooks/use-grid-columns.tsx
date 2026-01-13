@@ -1,5 +1,6 @@
 import type {
   IAttachmentCellValue,
+  ISignatureCellValue,
   IButtonFieldCellValue,
   IButtonFieldOptions,
   INumberShowAs,
@@ -463,6 +464,29 @@ export const useCreateCellValue2GridDisplay = (
               customEditor: (props) => (
                 <GridAttachmentEditor field={field} record={record} {...props} />
               ),
+            };
+          }
+          case FieldType.Signature: {
+            const cv = cellValue as ISignatureCellValue | null;
+            if (!cv || !cv.presignedUrl) {
+              return {
+                ...baseCellProps,
+                type: CellType.Text,
+                data: '',
+                displayData: '',
+              };
+            }
+            const data = [
+              {
+                id: cv.id,
+                url: cv.presignedUrl,
+              },
+            ];
+            return {
+              ...baseCellProps,
+              type: CellType.Image,
+              data,
+              displayData: [cv.presignedUrl],
             };
           }
           case FieldType.Checkbox: {

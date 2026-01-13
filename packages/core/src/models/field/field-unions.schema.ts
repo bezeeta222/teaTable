@@ -37,6 +37,7 @@ import {
 } from './derivate/number-option.schema';
 import { ratingFieldOptionsSchema } from './derivate/rating-option.schema';
 import { rollupFieldOptionsSchema } from './derivate/rollup-option.schema';
+import { signatureFieldOptionsSchema } from './derivate/signature-option.schema';
 import { singlelineTextFieldOptionsSchema } from './derivate/single-line-text-option.schema';
 import { userFieldOptionsSchema } from './derivate/user-option.schema';
 import { unionFormattingSchema } from './formatting';
@@ -57,6 +58,7 @@ export const unionFieldOptions = z.union([
   createdByFieldOptionsSchema.strict(),
   lastModifiedByFieldOptionsSchema.strict(),
   buttonFieldOptionsSchema.strict(),
+  signatureFieldOptionsSchema.strict(),
 ]);
 
 // Common options schema for lookup fields

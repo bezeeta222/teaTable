@@ -15,6 +15,8 @@ import type {
   ISingleSelectCellValue,
   IUserCellValue,
   IUserFieldOptions,
+  ISignatureCellValue,
+  ISignatureFieldOptions,
 } from '@teable/core';
 import { FieldType } from '@teable/core';
 import { temporaryPaste } from '@teable/openapi';
@@ -34,6 +36,7 @@ import {
   LinkEditor,
   UserEditor,
   ButtonEditor,
+  SignatureEditor,
 } from '../editor';
 import type { IEditorRef } from '../editor/type';
 import type { ICellValueEditor } from './type';
@@ -222,6 +225,17 @@ export const CellEditorMain = (props: Omit<ICellValueEditor, 'wrapClassName' | '
           readonly={readonly}
           statusHook={buttonClickStatusHook}
           record={record}
+        />
+      );
+    }
+    case FieldType.Signature: {
+      return (
+        <SignatureEditor
+          className={className}
+          options={options as ISignatureFieldOptions}
+          value={cellValue as ISignatureCellValue}
+          onChange={onChange}
+          readonly={readonly}
         />
       );
     }

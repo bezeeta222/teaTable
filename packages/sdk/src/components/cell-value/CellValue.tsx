@@ -10,6 +10,7 @@ import type {
   SingleLineTextDisplayType,
   IButtonFieldCellValue,
   IButtonFieldOptions,
+  ISignatureCellValue,
 } from '@teable/core';
 import { CellValueType, FieldType } from '@teable/core';
 import { cn } from '@teable/ui-lib';
@@ -17,6 +18,7 @@ import type { IFieldInstance } from '../../model';
 import { CellAttachment } from './cell-attachment';
 import { CellButton } from './cell-button';
 import { CellCheckbox } from './cell-checkbox';
+import { CellSignature } from './cell-signature';
 import { CellDate } from './cell-date';
 import { CellLink } from './cell-link';
 import { CellNumber } from './cell-number';
@@ -184,6 +186,15 @@ export const CellValue = (props: ICellValueContainer) => {
           value={value as ILinkCellValue | ILinkCellValue[]}
           className={className}
           itemClassName={itemClassName}
+        />
+      );
+    }
+    case FieldType.Signature: {
+      return (
+        <CellSignature
+          value={value as ISignatureCellValue}
+          className={className}
+          formatImageUrl={formatImageUrl}
         />
       );
     }

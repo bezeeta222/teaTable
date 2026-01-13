@@ -17,6 +17,7 @@ import { longTextFieldOptionsSchema } from './derivate/long-text-option.schema';
 import { numberFieldOptionsSchema } from './derivate/number-option.schema';
 import { ratingFieldOptionsSchema } from './derivate/rating-option.schema';
 import { rollupFieldOptionsSchema } from './derivate/rollup-option.schema';
+import { signatureFieldOptionsSchema } from './derivate/signature-option.schema';
 import { singlelineTextFieldOptionsSchema } from './derivate/single-line-text-option.schema';
 import { userFieldOptionsSchema } from './derivate/user-option.schema';
 
@@ -62,6 +63,8 @@ export function safeParseOptions(fieldType: FieldType, value: unknown) {
       return conditionalRollupFieldOptionsSchema.safeParse(value);
     case FieldType.Button:
       return buttonFieldOptionsSchema.safeParse(value);
+    case FieldType.Signature:
+      return signatureFieldOptionsSchema.safeParse(value);
     default:
       assertNever(fieldType);
   }

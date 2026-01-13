@@ -1443,6 +1443,8 @@ export type I18nTranslations = {
             "resetSuccess": string;
             "click": string;
             "clickedCount": string;
+            "clear": string;
+            "save": string;
         };
         "notification": {
             "title": string;
@@ -1545,6 +1547,9 @@ export type I18nTranslations = {
             "error": {
                 "refineOptionsError": string;
                 "optionsRequired": string;
+            };
+            "signature": {
+                "placeholder": string;
             };
         };
         "filter": {
@@ -1728,6 +1733,7 @@ export type I18nTranslations = {
                 "button": string;
                 "createdBy": string;
                 "lastModifiedBy": string;
+                "signature": string;
             };
             "description": {
                 "singleLineText": string;
@@ -1752,6 +1758,7 @@ export type I18nTranslations = {
                 "button": string;
                 "createdBy": string;
                 "lastModifiedBy": string;
+                "signature": string;
             };
             "link": {
                 "oneWay": string;
@@ -3215,6 +3222,9 @@ export type I18nTranslations = {
                         "xor": string;
                     };
                 };
+                "signature": {
+                    "title": string;
+                };
                 "conditionalRollup": {
                     "title": string;
                     "description": string;
@@ -3305,6 +3315,16 @@ export type I18nTranslations = {
                     "sortMissingWarningTitle": string;
                     "sortMissingWarningDescription": string;
                 };
+                "signature": {
+                    "penColor": string;
+                    "penWidth": string;
+                    "background": string;
+                    "showTimestamp": string;
+                    "bgTransparent": string;
+                    "bgWhite": string;
+                    "bgGray": string;
+                    "bgCream": string;
+                };
                 "lastModifiedScope": string;
                 "lastModifiedAll": string;
                 "lastModifiedSpecific": string;
@@ -3342,6 +3362,7 @@ export type I18nTranslations = {
                 "button": string;
                 "lookup": string;
                 "conditionalRollup": string;
+                "signature": string;
             };
             "fieldName": string;
             "fieldNameOptional": string;

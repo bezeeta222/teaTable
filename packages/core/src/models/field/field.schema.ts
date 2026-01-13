@@ -22,6 +22,7 @@ import { longTextFieldOptionsSchema } from './derivate/long-text-option.schema';
 import { numberFieldOptionsRoSchema } from './derivate/number-option.schema';
 import { ratingFieldOptionsSchema } from './derivate/rating-option.schema';
 import { rollupFieldOptionsSchema } from './derivate/rollup-option.schema';
+import { signatureFieldOptionsSchema } from './derivate/signature-option.schema';
 import { singlelineTextFieldOptionsSchema } from './derivate/single-line-text-option.schema';
 import { userFieldOptionsSchema } from './derivate/user-option.schema';
 import {
@@ -235,6 +236,8 @@ export const getOptionsSchema = (type: FieldType) => {
       return lastModifiedByFieldOptionsSchema;
     case FieldType.Button:
       return buttonFieldOptionsSchema;
+    case FieldType.Signature:
+      return signatureFieldOptionsSchema;
     default:
       assertNever(type);
   }

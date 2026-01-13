@@ -33,6 +33,7 @@ import {
   Relationship,
   RelationshipRevert,
   SelectFieldCore,
+  SignatureFieldCore,
   SingleLineTextFieldCore,
   UserFieldCore,
   HttpErrorCode,
@@ -1201,6 +1202,19 @@ export class FieldSupplementService {
     };
   }
 
+  private prepareSignatureField(field: IFieldRo) {
+    const { name, options } = field;
+
+    return {
+      ...field,
+      name: name ?? 'Signature',
+      options: options ?? SignatureFieldCore.defaultOptions(),
+      cellValueType: CellValueType.String,
+      dbFieldType: DbFieldType.Json,
+      isMultipleCellValue: false,
+    };
+  }
+
   private async prepareUpdateUserField(fieldRo: IFieldRo, oldFieldVo: IFieldVo) {
     const mergeObj = {
       ...oldFieldVo,
@@ -1387,6 +1401,8 @@ export class FieldSupplementService {
         return this.prepareCheckboxField(fieldRo);
       case FieldType.Button:
         return this.prepareButtonField(fieldRo);
+      case FieldType.Signature:
+        return this.prepareSignatureField(fieldRo);
       default:
         throw new CustomHttpException(
           `Unsupported field type ${fieldRo.type}`,
@@ -1500,6 +1516,8 @@ export class FieldSupplementService {
         return this.prepareLastModifiedByField(fieldRo);
       case FieldType.CreatedBy:
         return this.prepareCreatedByField(fieldRo);
+      case FieldType.Signature:
+        return this.prepareSignatureField(fieldRo);
       default:
         throw new CustomHttpException(
           `Unsupported field type ${fieldRo.type}`,

@@ -15,6 +15,7 @@ import type {
   RatingFieldCore,
   RollupFieldCore,
   ConditionalRollupFieldCore,
+  SignatureFieldCore,
   SingleLineTextFieldCore,
   SingleSelectFieldCore,
   UserFieldCore,
@@ -380,6 +381,10 @@ export class CreateSqliteDatabaseColumnFieldVisitor implements IFieldVisitor<voi
   }
 
   visitButtonField(field: ButtonFieldCore): void {
+    this.createStandardColumn(field);
+  }
+
+  visitSignatureField(field: SignatureFieldCore): void {
     this.createStandardColumn(field);
   }
 
