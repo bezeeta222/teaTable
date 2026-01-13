@@ -6,23 +6,51 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Teable is an open-source Airtable alternative built as a no-code database platform with a spreadsheet-like interface backed by PostgreSQL. It supports real-time collaboration, multiple views (grid, form, kanban, gallery, calendar), and handles millions of rows.
 
-## Common Commands
+## Development Setup
 
-### Development Setup
+### Quick Start (Recommended)
 ```bash
 pnpm install                    # Install dependencies
-make switch-db-mode             # Choose SQLite (dev) or PostgreSQL
 pnpm g:build                    # Build all packages (required first run)
+pnpm run dev:start              # Start Docker (PG + Redis) + PM2 (Backend + Frontend)
 ```
 
-### Running Development Servers
+The `dev:start` script automatically:
+1. Starts PostgreSQL (port 54321) and Redis (port 6379) via Docker
+2. Waits for database to be ready
+3. Starts backend (port 3000) and frontend (port 3002) via PM2
+4. Shows PM2 status with all running processes
+
+### Manual Development (Alternative)
 ```bash
-# Terminal 1 - Backend (NestJS)
+# Terminal 1 - Start Docker services
+docker compose -f docker-compose.dev.yaml up -d
+
+# Terminal 2 - Backend (NestJS)
 pnpm -F @teable/backend dev     # Or dev:swc for faster startup
 
-# Terminal 2 - Frontend (Next.js)
+# Terminal 3 - Frontend (Next.js)
 pnpm -F @teable/app dev
 ```
+
+### Development URLs
+- **Frontend**: http://localhost:3002
+- **Backend API**: http://localhost:3000
+- **PostgreSQL**: localhost:54321 (user: teable, db: teable)
+- **Redis**: localhost:6379
+
+### PM2 Commands
+```bash
+pm2 status                      # Check running processes
+pm2 logs                        # View all logs
+pm2 logs teable-backend         # View backend logs only
+pm2 logs teable-frontend        # View frontend logs only
+pm2 restart all                 # Restart all services
+pm2 stop all                    # Stop all services
+pm2 delete all                  # Remove all processes
+```
+
+## Common Commands
 
 ### Testing
 ```bash
@@ -40,20 +68,52 @@ pnpm g:typecheck                # TypeScript check all
 pnpm g:fix-all-files            # Auto-fix linting issues
 ```
 
-### Database Migrations (Prisma)
+### Database (Prisma)
 ```bash
-make db-migration               # Create migration for both SQLite & PostgreSQL
-pnpm -F @teable/db-main-prisma prisma-generate    # Generate Prisma client
-pnpm -F @teable/db-main-prisma prisma-studio      # Open Prisma Studio GUI
+cd packages/db-main-prisma
+pnpm exec prisma generate --schema=prisma/postgres/schema.prisma   # Generate client
+pnpm exec prisma studio --schema=prisma/postgres/schema.prisma     # Open Studio GUI
+pnpm exec prisma migrate deploy --schema=prisma/postgres/schema.prisma  # Apply migrations
 ```
 
 ### Building
 ```bash
-pnpm g:build                    # Build all
+pnpm g:build                    # Build all packages
 pnpm -F @teable/app build-fast  # Quick frontend build (skip checks)
 ```
 
 ## Architecture
+
+### Development Architecture
+```
+┌────────────────────────────────────────────────────────────┐
+│                    LOCAL DEVELOPMENT                        │
+├────────────────────────────────────────────────────────────┤
+│  Docker Compose (docker-compose.dev.yaml)                   │
+│  ├── PostgreSQL 15.4  → localhost:54321                    │
+│  └── Redis 7.2.4      → localhost:6379                     │
+├────────────────────────────────────────────────────────────┤
+│  PM2 Process Manager (ecosystem.config.js)                  │
+│  ├── teable-backend   → localhost:3000 (Node.js)           │
+│  └── teable-frontend  → localhost:3002 (Next.js)           │
+│       └── API Proxy: /api/* → localhost:3000               │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Production Architecture (Dokploy on Vultr)
+```
+┌────────────────────────────────────────────────────────────┐
+│                    VULTR SERVER (Dokploy)                   │
+├────────────────────────────────────────────────────────────┤
+│  Docker Containers:                                         │
+│  ├── teable         → Main app (stateless)                 │
+│  ├── teable-db      → PostgreSQL 15.4 (volume: teable-db)  │
+│  └── teable-cache   → Redis 7.2.4 (volume: teable-cache)   │
+├────────────────────────────────────────────────────────────┤
+│  External Services:                                         │
+│  └── Cloudflare R2  → File storage (S3-compatible)         │
+└────────────────────────────────────────────────────────────┘
+```
 
 ### Monorepo Structure
 ```
@@ -76,12 +136,15 @@ plugins/                # Plugin system (iframe-isolated with Penpal bridge)
 ### Frontend-Backend Communication
 
 **REST API**: OpenAPI-typed endpoints, React Query for data fetching
-- Query client configured in `packages/sdk/src/context/app/queryClient.tsx`
-- Query keys in `packages/sdk/src/config/react-query-keys.ts`
+- Query client: `packages/sdk/src/context/app/queryClient.tsx`
+- Query keys: `packages/sdk/src/config/react-query-keys.ts`
+
+**API Proxy** (Development): Next.js rewrites `/api/*` to backend
+- Configured in `apps/nextjs-app/next.config.mjs`
+- Requires `NEXT_DEV_API_PROXY=true` in `.env` during build
 
 **Real-time Collaboration**: ShareDB + Operational Transformation (OT)
 - Backend: `apps/nestjs-backend/src/share-db/` - adapter, service, Redis pub/sub
-- Frontend receives operations via WebSocket, applies to local state
 - Multi-server support via Redis pub/sub
 
 ### State Management
@@ -97,7 +160,7 @@ plugins/                # Plugin system (iframe-isolated with Penpal bridge)
 
 ### Database Layer
 
-**ORM**: Prisma with PostgreSQL (production) or SQLite (development)
+**ORM**: Prisma with PostgreSQL
 - Schema: `packages/db-main-prisma/prisma/postgres/schema.prisma`
 - DB providers: `apps/nestjs-backend/src/db-provider/` abstracts SQL differences
 
@@ -119,6 +182,16 @@ Major features: table, field, record, base, space, auth, share-db, plugin, attac
 - Communication via Penpal (postMessage bridge)
 - Backend: `apps/nestjs-backend/src/features/plugin/`
 - SDK bridge: `packages/sdk/src/plugin-bridge/`
+
+## Key Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `ecosystem.config.js` | PM2 process configuration (backend + frontend) |
+| `docker-compose.dev.yaml` | Local Docker services (PostgreSQL + Redis) |
+| `apps/nextjs-app/.env` | Frontend environment (API proxy config) |
+| `apps/nestjs-backend/.env` | Backend environment (DB, Redis, storage) |
+| `packages/db-main-prisma/prisma/postgres/schema.prisma` | Database schema |
 
 ## Code Conventions
 
@@ -142,6 +215,22 @@ feat|fix|docs|test|refactor|style|chore|perf|ci|build|revert|translation|securit
 ### Imports Order
 builtin → external → internal → parent → sibling → index
 
+## Technical Notes
+
+### API Proxy Configuration
+The frontend uses Next.js rewrites to proxy `/api/*` requests to the backend. This is baked at **build time**, not runtime.
+
+**Important**: If API calls return 404 in development:
+1. Ensure `NEXT_DEV_API_PROXY=true` is in `apps/nextjs-app/.env`
+2. Rebuild the frontend: `pnpm -F @teable/app build`
+
+### Known Warnings (Non-Critical)
+- **sqlite3 native build**: May fail during `pnpm install` due to missing Python distutils. This is non-critical as production uses PostgreSQL.
+- **Lint warnings**: ~76 warnings exist in test files (`apps/nestjs-backend/test/`) for unused variables. These are pre-existing and don't affect functionality.
+
+### Package Manager
+This project uses **pnpm** (not npm/yarn/bun). Bun was tested but causes NestJS dependency injection issues in monorepos due to separate package instance resolution.
+
 ## Key Files
 
 - `apps/nestjs-backend/src/app.module.ts` - Backend module registration
@@ -149,3 +238,4 @@ builtin → external → internal → parent → sibling → index
 - `packages/core/src/models/field/` - Field type definitions
 - `packages/sdk/src/hooks/` - React data fetching hooks
 - `packages/db-main-prisma/prisma/` - Database schema
+- `scripts/dev-start.sh` - Development startup script
