@@ -37,9 +37,20 @@ for i in {1..30}; do
     sleep 1
 done
 
-# Step 2: Start PM2 (Backend first, then Frontend)
+# Step 2: Ensure Prisma client is generated
 echo ""
-echo "2️⃣  Starting PM2..."
+echo "2️⃣  Ensuring Prisma client is generated..."
+cd "$PROJECT_DIR/packages/db-main-prisma"
+if pnpm exec prisma generate --schema=prisma/postgres/schema.prisma > /dev/null 2>&1; then
+    echo "   ✅ Prisma client ready"
+else
+    echo "   ⚠️  Prisma generate failed, trying to continue..."
+fi
+cd "$PROJECT_DIR"
+
+# Step 3: Start PM2 (Backend first, then Frontend)
+echo ""
+echo "3️⃣  Starting PM2..."
 
 # Delete old processes and start fresh
 pm2 delete all 2>/dev/null || true
