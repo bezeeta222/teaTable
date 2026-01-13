@@ -73,16 +73,22 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 3002,
         PUBLIC_ORIGIN: 'http://127.0.0.1:3000', // Backend API URL
+        NEXT_DEV_API_PROXY: 'true', // Enable API proxy to backend
+        BACKEND_PORT: '3000',
       },
       env_production: {
         NODE_ENV: 'production',
         PORT: 3002,
         PUBLIC_ORIGIN: 'http://127.0.0.1:3000',
+        NEXT_DEV_API_PROXY: 'true',
+        BACKEND_PORT: '3000',
       },
       env_development: {
         NODE_ENV: 'development',
         PORT: 3002,
         PUBLIC_ORIGIN: 'http://127.0.0.1:3000',
+        NEXT_DEV_API_PROXY: 'true',
+        BACKEND_PORT: '3000',
       },
       error_file: './logs/frontend-error.log',
       out_file: './logs/frontend-out.log',

@@ -216,12 +216,22 @@ const nextConfig = {
 
   // @link https://nextjs.org/docs/api-reference/next.config.js/rewrites
   async rewrites() {
+    // Enable proxy when running frontend separately from backend (local PM2 dev setup)
+    // Use NEXT_DEV_API_PROXY=true to enable even in production mode
+    const enableProxy = !isProd || trueEnv.includes(process.env?.NEXT_DEV_API_PROXY ?? 'false');
+    const backendPort = process.env.BACKEND_PORT || '3000';
+
+    const apiProxy = {
+      source: '/api/:path*',
+      destination: `http://localhost:${backendPort}/api/:path*`,
+    };
+
     const socketProxy = {
       source: '/socket/:path*',
       destination: `http://localhost:${NEXTJS_SOCKET_PORT}/socket/:path*`,
     };
 
-    return isProd ? [] : [socketProxy];
+    return enableProxy ? [apiProxy, socketProxy] : [];
   },
 
   // @link https://nextjs.org/docs/api-reference/next.config.js/headers

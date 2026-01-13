@@ -71,3 +71,6 @@ pnpm-debug.log*
 # LocalStorage assets
 
 **/.assets
+# Local development logs
+apps/*/logs/
+logs/
