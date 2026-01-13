@@ -4,23 +4,15 @@
 # Teable Development Start Script
 # ============================================
 # 1. Starts Docker (PostgreSQL + Redis)
-# 2. Syncs production data to local
-# 3. Starts PM2 (Backend + Frontend)
+# 2. Starts PM2 (Backend + Frontend)
 # ============================================
-
-set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Configuration
-SSH_KEY="$HOME/.ssh/id_ed25519_vultr"
-SERVER_IP="149.28.148.139"
-PROD_CONTAINER="teable-f7eff2df-teable-db-1"
 LOCAL_CONTAINER="teable-teable-db-1"
 DB_USER="teable"
 DB_NAME="teable"
-BACKUP_FILE="/tmp/teable_production_backup.dump"
 
 cd "$PROJECT_DIR"
 
@@ -39,70 +31,59 @@ for i in {1..30}; do
         echo "   ✅ PostgreSQL is ready"
         break
     fi
+    if [ $i -eq 30 ]; then
+        echo "   ⚠️  PostgreSQL timeout, continuing anyway..."
+    fi
     sleep 1
 done
 
-# Step 2: Sync production data
+# Step 2: Start PM2 (Backend first, then Frontend)
 echo ""
-echo "2️⃣  Syncing production data from Vultr..."
-echo "   Dumping production database..."
-ssh -i "$SSH_KEY" -o ConnectTimeout=10 root@"$SERVER_IP" \
-    "docker exec $PROD_CONTAINER pg_dump -U $DB_USER -d $DB_NAME --format=custom" \
-    > "$BACKUP_FILE" 2>/dev/null
+echo "2️⃣  Starting PM2..."
 
-if [ -f "$BACKUP_FILE" ] && [ -s "$BACKUP_FILE" ]; then
-    DUMP_SIZE=$(ls -lh "$BACKUP_FILE" | awk '{print $5}')
-    echo "   Restoring to local ($DUMP_SIZE)..."
-    docker exec -i "$LOCAL_CONTAINER" pg_restore \
-        -U "$DB_USER" \
-        -d "$DB_NAME" \
-        --clean \
-        --if-exists \
-        --no-owner \
-        < "$BACKUP_FILE" 2>/dev/null || true
-    echo "   ✅ Production data synced"
-else
-    echo "   ⚠️  Could not connect to production server, using existing local data"
-fi
-
-# Step 3: Start PM2 (Backend first, then Frontend)
-echo ""
-echo "3️⃣  Starting PM2..."
-
-# Stop any existing processes first
-pm2 stop all 2>/dev/null || true
+# Delete old processes and start fresh
+pm2 delete all 2>/dev/null || true
 
 # Start backend first
 echo "   Starting backend..."
-pm2 start ecosystem.config.js --only teable-backend 2>/dev/null
+pm2 start ecosystem.config.js --only teable-backend
 
 # Wait for backend to be ready before starting frontend
 echo "   Waiting for backend to be ready..."
 for i in {1..60}; do
-    if curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/auth/user 2>/dev/null | grep -q "401"; then
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3000/api/auth/user 2>/dev/null || echo "000")
+    if [ "$HTTP_CODE" = "401" ] || [ "$HTTP_CODE" = "200" ]; then
         echo "   ✅ Backend is ready"
         break
     fi
     if [ $i -eq 60 ]; then
-        echo "   ⚠️  Backend startup timed out, starting frontend anyway"
+        echo "   ⚠️  Backend startup timed out"
+        echo "   Check logs: pm2 logs teable-backend"
     fi
     sleep 1
 done
 
 # Now start frontend
 echo "   Starting frontend..."
-pm2 start ecosystem.config.js --only teable-frontend 2>/dev/null
+pm2 start ecosystem.config.js --only teable-frontend
 
 # Wait for frontend to be ready
 echo "   Waiting for frontend to be ready..."
 for i in {1..30}; do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3002/ 2>/dev/null)
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:3002/ 2>/dev/null || echo "000")
     if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "307" ]; then
         echo "   ✅ Frontend is ready"
         break
     fi
+    if [ $i -eq 30 ]; then
+        echo "   ⚠️  Frontend startup timed out"
+    fi
     sleep 1
 done
+
+# Show status
+echo ""
+pm2 status
 
 # Summary
 echo ""
@@ -114,7 +95,8 @@ echo "📍 Frontend:  http://127.0.0.1:3002"
 echo "📍 Backend:   http://127.0.0.1:3000"
 echo ""
 echo "📋 Commands:"
-echo "   pm2 logs      - View logs"
-echo "   pm2 stop all  - Stop services"
-echo "   pm2 restart   - Restart services"
+echo "   pm2 logs           - View all logs"
+echo "   pm2 logs --lines 100  - View last 100 lines"
+echo "   pnpm run dev:stop  - Stop all services"
+echo "   pnpm run dev:logs  - View logs"
 echo ""

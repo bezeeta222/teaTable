@@ -1,8 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import {
-  GET_SUBSCRIPTION_SUMMARY,
-  GET_SUBSCRIPTION_SUMMARY_LIST,
-} from '@teable/openapi';
+import { GET_SUBSCRIPTION_SUMMARY, GET_SUBSCRIPTION_SUMMARY_LIST } from '@teable/openapi';
 import { Public } from '../../auth/decorators/public.decorator';
 
 /**
